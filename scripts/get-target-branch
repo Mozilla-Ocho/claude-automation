@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Script to get branch name for a Linear issue
+# Usage: ./get-branch-name <issue-id>
+
+# Colors for output (only if running in terminal)
+if [ -t 1 ]; then
+    RED='\033[0;31m'
+    # GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' # No Color
+else
+    RED=''
+    # GREEN=''
+    YELLOW=''
+    NC=''
+fi
+
+# Functions
+print_error() {
+    echo -e "${RED}Error: $1${NC}" >&2
+}
+
+print_info() {
+    [ -t 1 ] && echo -e "${YELLOW}→ $1${NC}" >&2
+}
+
+validate_issue_id() {
+    local issue_id="$1"
+    if [[ ! "$issue_id" =~ ^CAR-[0-9]+$ ]]; then
+        print_error "Invalid issue ID format. Expected format: CAR-123"
+        return 1
+    fi
+    return 0
+}
+
+slugify_issue_id() {
+    local issue_id="$1"
+    # Convert to lowercase, replace non-alphanumeric chars with hyphens
+    # Remove multiple consecutive hyphens and trim leading/trailing hyphens    
+    echo "$issue_id" | tr '[:lower:]' '[:upper:]' | sed 's/[^a-z0-9]/-/gi' | sed 's/-\+/-/g' | sed 's/^-\|-$//g'
+}
+
+slugify_title() {
+    local title="$1"
+    # Convert to lowercase, replace non-alphanumeric chars with hyphens
+    # Remove multiple consecutive hyphens and trim leading/trailing hyphens
+    echo "$title" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g'
+}
+
+check_linear_cli_available() {
+    if ! command -v linear &> /dev/null; then
+        print_error "Linear CLI not found. Please install it first."
+        print_error "Install with: npm install -g @egcli/lr"
+        print_error "Then run: linear init"
+        return 1
+    fi
+    return 0
+}
+
+get_branch_name_from_linear() {
+    local issue_id="$1"
+    
+    # Get issue details from Linear CLI
+    local issue_output
+    if ! issue_output=$(linear issue "$issue_id" 2>&1); then
+        print_error "Failed to fetch issue from Linear"
+        print_error "Error: $issue_output"
+        return 1
+    fi
+    
+    # Extract the title from the output (second line after issue ID)
+    # Remove box drawing characters and trim whitespace
+    local title
+    title=$(echo "$issue_output" | grep -A1 "$issue_id" | tail -n1 | sed 's/│//g' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+
+    if [ -z "$title" ]; then
+        print_error "Could not extract title from Linear issue"
+        return 1
+    fi
+    
+    print_info "Found issue title: $title"
+    
+    # Generate branch name
+    local issue_slug
+    issue_slug=$(slugify_issue_id "$issue_id")
+
+    local title_slug
+    title_slug=$(slugify_title "$title")
+
+    # Construct branch name
+    local branch_name="${issue_slug}-${title_slug}"
+    
+    # Ensure branch name isn't too long (git has limits)
+    if [ ${#branch_name} -gt 100 ]; then
+        # Truncate the title part if too long
+        local max_title_length=$((100 - ${#issue_slug} - 1))
+        title_slug="${title_slug:0:$max_title_length}"
+        branch_name="${issue_slug}-${title_slug}"
+    fi
+    
+    echo "$branch_name"
+}
+
+# Main
+main() {
+    # Check if issue ID is provided
+    if [ $# -eq 0 ]; then
+        print_error "No issue ID provided"
+        echo "Usage: $0 <issue-id>"
+        echo "Example: $0 CAR-123"
+        exit 1
+    fi
+
+    local issue_id="$1"
+    
+    # Validate issue ID
+    if ! validate_issue_id "$issue_id"; then
+        exit 1
+    fi
+
+    # Check if Linear CLI is available
+    if ! check_linear_cli_available; then
+        exit 1
+    fi
+
+    # Get and output the branch name
+    local branch_name
+    if ! branch_name=$(get_branch_name_from_linear "$issue_id"); then
+        exit 1
+    fi
+    if [ -z "$branch_name" ]; then
+        exit 1
+    fi
+    
+    # Output only the branch name (no logging)
+    echo "$branch_name"
+}
+
+# Run main function
+main "$@"

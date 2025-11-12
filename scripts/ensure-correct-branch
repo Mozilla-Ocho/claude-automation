@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# # echo commands
+# set -x
+
+issue_id="$1"
+TARGET_BRANCH=$(./scripts/get-target-branch "$issue_id")
+CURRENT_BRANCH=$(./scripts/get-current-branch)
+
+if [ -z "$CURRENT_BRANCH" ]; then
+  echo "You are not in a branch of a git repo. Please start again in the main branch of your git repo."
+  exit 1
+fi
+
+if [ "$CURRENT_BRANCH" = "$TARGET_BRANCH" ]; then
+    echo "Current branch already set to target branch. Nothing to do."
+    exit 0
+fi
+
+if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "master" ]; then
+    echo "You are in a non-main branch that is NOT the target branch. Please start again in the main branch of your git repo."
+    exit 1
+fi
+
+# # Confirm working directory is clean
+# if [ -n "$(git status --porcelain)" ]; then
+#     echo "Error: Working directory has uncommitted changes. Please commit or stash them first."
+#     git status
+#     exit 1
+# fi
+
+git pull
+EXISTING_TARGET_BRANCH=$(git branch | grep -q "$TARGET_BRANCH" && echo "$TARGET_BRANCH" || echo "")
+if [ -z "$EXISTING_TARGET_BRANCH" ]; then
+    echo "Target branch does not exist. Creating it."
+    git checkout -b "$TARGET_BRANCH"
+else
+    git checkout "$TARGET_BRANCH"
+fi

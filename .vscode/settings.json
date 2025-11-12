@@ -1,0 +1,49 @@
+{
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "cSpell.enabled": true,
+  "cSpell.language": "en",
+  "cSpell.words": [
+    "nextjs",
+    "prisma",
+    "tiptap",
+    "carmen",
+    "Reitano",
+    "linearis",
+    "Unpublishing",
+    "dropcursor",
+    "sendgrid",
+    "chartjs",
+    "swipeable",
+    "solopreneur",
+    "pkill",
+    "shellcheck",
+    "psql",
+    "ultrathinking",
+    "claudecode"
+  ],
+  "cSpell.ignorePaths": [
+    "node_modules",
+    ".next",
+    "dist",
+    ".vscode",
+    "**/*.json"
+  ],
+  "cSpell.ignoreRegExpList": [
+    "/\\b[A-Z]{3,5}\\b/g"
+  ]
+}
