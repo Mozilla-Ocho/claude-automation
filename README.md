@@ -1,6 +1,6 @@
 # claude-automation
 
-This repo contains scripts and configuration files for automatic development of a Next.js app. These items were extracted from [the Carmen project](https://github.com/Mozilla-Ocho/carmen/).
+This repo contains scripts and configuration files for AI-assisted development of a Next.js app. These items were extracted from [the Carmen project](https://github.com/Mozilla-Ocho/carmen/).
 
 ## One-time setup
 
@@ -20,4 +20,4 @@ You can copy these files as is into your project's repo.
 
 ## Items for CLAUDE.md
 
-In your project's CLAUDE.md file, either include [CLAUDE-AUTOMATION.md](./CLAUDE-AUTOMATION.md) with @CLAUDE-AUTOMATION.md or paste the contents directly into CLAUDE.md.
+In your project's CLAUDE.md file, either include [CLAUDE-AUTOMATION.md](./CLAUDE-AUTOMATION.md) with @CLAUDE-AUTOMATION.md or paste its contents directly into CLAUDE.md.
